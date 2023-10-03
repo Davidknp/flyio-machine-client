@@ -1,0 +1,2787 @@
+openapi: 3.0.1
+info:
+  title: Fly Machines API
+  description: ""
+  contact: {}
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: "1.0"
+externalDocs:
+  url: https://fly.io/docs/machines/working-with-machines/
+servers:
+- url: https://api.machines.dev/v1
+paths:
+  /apps:
+    get:
+      tags:
+      - Apps
+      operationId: Apps_list
+      parameters:
+      - name: org_slug
+        in: query
+        description: "The org slug, or 'personal', to filter apps"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAppsResponse'
+    post:
+      tags:
+      - Apps
+      operationId: Apps_create
+      requestBody:
+        description: App body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+  /apps/{app_name}:
+    get:
+      tags:
+      - Apps
+      operationId: Apps_show
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+    delete:
+      tags:
+      - Apps
+      operationId: Apps_delete
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "202":
+          description: Accepted
+          content: {}
+  /apps/{app_name}/machines:
+    get:
+      tags:
+      - Machines
+      operationId: Machines_list
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: include_deleted
+        in: query
+        description: Include deleted machines
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      - name: region
+        in: query
+        description: Region filter
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Machine'
+                x-content-type: application/json
+    post:
+      tags:
+      - Machines
+      operationId: Machines_create
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Create machine request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMachineRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Machine'
+      x-codegen-request-body-name: request
+  /apps/{app_name}/machines/{machine_id}:
+    get:
+      tags:
+      - Machines
+      operationId: Machines_show
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Machine'
+    post:
+      tags:
+      - Machines
+      operationId: Machines_update
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMachineRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Machine'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+    delete:
+      tags:
+      - Machines
+      operationId: Machines_delete
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content: {}
+  /apps/{app_name}/machines/{machine_id}/cordon:
+    post:
+      tags:
+      - Machines
+      description: "“Cordoning” a machine refers to disabling its services, so the\
+        \ proxy won’t route requests to it. In flyctl this is used by blue/green deployments;\
+        \ one set of machines is started up with services disabled, and when they\
+        \ are all healthy, the services are enabled on the new machines and disabled\
+        \ on the old ones."
+      operationId: Machines_cordon
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content: {}
+  /apps/{app_name}/machines/{machine_id}/events:
+    get:
+      tags:
+      - Machines
+      operationId: Machines_list_events
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MachineEvent'
+                x-content-type: application/json
+  /apps/{app_name}/machines/{machine_id}/exec:
+    post:
+      tags:
+      - Machines
+      operationId: Machines_exec
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MachineExecRequest'
+        required: true
+      responses:
+        "200":
+          description: Raw command output bytes are written back
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                x-content-type: application/octet-stream
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+  /apps/{app_name}/machines/{machine_id}/lease:
+    get:
+      tags:
+      - Machines
+      operationId: Machines_show_lease
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lease'
+    post:
+      tags:
+      - Machines
+      operationId: Machines_create_lease
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLeaseRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lease'
+      x-codegen-request-body-name: request
+    delete:
+      tags:
+      - Machines
+      operationId: Machines_release_lease
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content: {}
+  /apps/{app_name}/machines/{machine_id}/metadata:
+    get:
+      tags:
+      - Machines
+      operationId: Machines_show_metadata
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                x-content-type: application/json
+  /apps/{app_name}/machines/{machine_id}/metadata/{key}:
+    post:
+      tags:
+      - Machines
+      operationId: Machines_update_metadata
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: key
+        in: path
+        description: Metadata Key
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+      - Machines
+      operationId: Machines_delete_metadata
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: key
+        in: path
+        description: Metadata Key
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+          content: {}
+  /apps/{app_name}/machines/{machine_id}/ps:
+    get:
+      tags:
+      - Machines
+      operationId: Machines_list_processes
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: sort_by
+        in: query
+        description: Sort by
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: order
+        in: query
+        description: Order
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProcessStat'
+                x-content-type: application/json
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /apps/{app_name}/machines/{machine_id}/restart:
+    post:
+      tags:
+      - Machines
+      operationId: Machines_restart
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: timeout
+        in: query
+        description: Restart timeout as a Go duration string or number of seconds
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /apps/{app_name}/machines/{machine_id}/signal:
+    post:
+      tags:
+      - Machines
+      operationId: Machines_signal
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+  /apps/{app_name}/machines/{machine_id}/start:
+    post:
+      tags:
+      - Machines
+      operationId: Machines_start
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content: {}
+  /apps/{app_name}/machines/{machine_id}/stop:
+    post:
+      tags:
+      - Machines
+      operationId: Machines_stop
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Optional request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StopRequest'
+        required: false
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: request
+  /apps/{app_name}/machines/{machine_id}/uncordon:
+    post:
+      tags:
+      - Machines
+      description: "“Cordoning” a machine refers to disabling its services, so the\
+        \ proxy won’t route requests to it. In flyctl this is used by blue/green deployments;\
+        \ one set of machines is started up with services disabled, and when they\
+        \ are all healthy, the services are enabled on the new machines and disabled\
+        \ on the old ones."
+      operationId: Machines_uncordon
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content: {}
+  /apps/{app_name}/machines/{machine_id}/versions:
+    get:
+      tags:
+      - Machines
+      operationId: Machines_list_versions
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MachineVersion'
+                x-content-type: application/json
+  /apps/{app_name}/machines/{machine_id}/wait:
+    get:
+      tags:
+      - Machines
+      operationId: Machines_wait
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: machine_id
+        in: path
+        description: Machine ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: instance_id
+        in: query
+        description: instance? version? TODO
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: timeout
+        in: query
+        description: wait timeout. default 60s
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: state
+        in: query
+        description: desired state
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - started
+          - stopped
+          - destroyed
+      responses:
+        "200":
+          description: OK
+          content: {}
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /apps/{app_name}/volumes:
+    get:
+      tags:
+      - Volumes
+      operationId: Volumes_list
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Volume'
+                x-content-type: application/json
+    post:
+      tags:
+      - Volumes
+      operationId: Volumes_create
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVolumeRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Volume'
+      x-codegen-request-body-name: request
+  /apps/{app_name}/volumes/{volume_id}:
+    get:
+      tags:
+      - Volumes
+      operationId: Volumes_get_by_id
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: volume_id
+        in: path
+        description: Volume ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Volume'
+    delete:
+      tags:
+      - Volumes
+      operationId: Volume_delete
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: volume_id
+        in: path
+        description: Volume ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Volume'
+  /apps/{app_name}/volumes/{volume_id}/extend:
+    put:
+      tags:
+      - Volumes
+      operationId: Volumes_extend
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: volume_id
+        in: path
+        description: Volume ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtendVolumeRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtendVolumeResponse'
+      x-codegen-request-body-name: request
+  /apps/{app_name}/volumes/{volume_id}/snapshots:
+    get:
+      tags:
+      - Volumes
+      operationId: Volumes_get_snapshots
+      parameters:
+      - name: app_name
+        in: path
+        description: Fly App Name
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: volume_id
+        in: path
+        description: Volume ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VolumeSnapshot'
+                x-content-type: application/json
+components:
+  schemas:
+    App:
+      type: object
+      properties:
+        name:
+          type: string
+        organization:
+          $ref: '#/components/schemas/Organization'
+        status:
+          type: string
+      example:
+        organization:
+          name: name
+          slug: slug
+        name: name
+        status: status
+    CheckStatus:
+      type: object
+      properties:
+        name:
+          type: string
+        output:
+          type: string
+        status:
+          type: string
+        updated_at:
+          type: string
+      example:
+        output: output
+        updated_at: updated_at
+        name: name
+        status: status
+    CreateAppRequest:
+      type: object
+      properties:
+        app_name:
+          type: string
+        network:
+          type: string
+        org_slug:
+          type: string
+    CreateLeaseRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        ttl:
+          type: integer
+    CreateMachineRequest:
+      type: object
+      properties:
+        config:
+          $ref: '#/components/schemas/api.MachineConfig'
+        lease_ttl:
+          type: integer
+        lsvd:
+          type: boolean
+        name:
+          type: string
+        region:
+          type: string
+        skip_launch:
+          type: boolean
+        skip_service_registration:
+          type: boolean
+    CreateVolumeRequest:
+      type: object
+      properties:
+        compute:
+          $ref: '#/components/schemas/api.MachineGuest'
+        encrypted:
+          type: boolean
+        fstype:
+          type: string
+        machines_only:
+          type: boolean
+        name:
+          type: string
+        region:
+          type: string
+        require_unique_zone:
+          type: boolean
+        size_gb:
+          type: integer
+        snapshot_id:
+          type: string
+          description: restore from snapshot
+        source_volume_id:
+          type: string
+          description: fork from remote volume
+    ErrorResponse:
+      type: object
+      properties:
+        details:
+          type: object
+          description: Deprecated
+        error:
+          type: string
+        status:
+          $ref: '#/components/schemas/main.statusCode'
+    ExtendVolumeRequest:
+      type: object
+      properties:
+        size_gb:
+          type: integer
+    ExtendVolumeResponse:
+      type: object
+      properties:
+        needs_restart:
+          type: boolean
+        volume:
+          $ref: '#/components/schemas/Volume'
+      example:
+        volume:
+          blocks: 6
+          attached_machine_id: attached_machine_id
+          created_at: created_at
+          blocks_free: 5
+          encrypted: true
+          zone: zone
+          blocks_avail: 1
+          name: name
+          size_gb: 5
+          attached_alloc_id: attached_alloc_id
+          id: id
+          state: state
+          region: region
+          block_size: 0
+          fstype: fstype
+        needs_restart: true
+    ImageRef:
+      type: object
+      properties:
+        digest:
+          type: string
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+        registry:
+          type: string
+        repository:
+          type: string
+        tag:
+          type: string
+      example:
+        registry: registry
+        digest: digest
+        tag: tag
+        repository: repository
+        labels:
+          key: labels
+    Lease:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Description or reason for the Lease.
+        expires_at:
+          type: integer
+          description: ExpiresAt is the unix timestamp in UTC to denote when the Lease
+            will no longer be valid.
+        nonce:
+          type: string
+          description: Nonce is the unique ID autogenerated and associated with the
+            Lease.
+        owner:
+          type: string
+          description: Owner is the user identifier which acquired the Lease.
+      example:
+        owner: owner
+        expires_at: 0
+        description: description
+        nonce: nonce
+    ListApp:
+      type: object
+      properties:
+        machine_count:
+          type: integer
+        name:
+          type: string
+        network:
+          type: object
+      example:
+        name: name
+        machine_count: 0
+        network: {}
+    ListAppsResponse:
+      type: object
+      properties:
+        apps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListApp'
+        total_apps:
+          type: integer
+      example:
+        total_apps: 6
+        apps:
+        - name: name
+          machine_count: 0
+          network: {}
+        - name: name
+          machine_count: 0
+          network: {}
+    ListenSocket:
+      type: object
+      properties:
+        address:
+          type: string
+        proto:
+          type: string
+      example:
+        address: address
+        proto: proto
+    Machine:
+      type: object
+      properties:
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckStatus'
+        config:
+          $ref: '#/components/schemas/api.MachineConfig'
+        created_at:
+          type: string
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/MachineEvent'
+        id:
+          type: string
+        image_ref:
+          $ref: '#/components/schemas/ImageRef'
+        instance_id:
+          type: string
+          description: InstanceID is unique for each version of the machine
+        name:
+          type: string
+        nonce:
+          type: string
+          description: Nonce is only every returned on machine creation if a lease_duration
+            was provided.
+        private_ip:
+          type: string
+          description: PrivateIP is the internal 6PN address of the machine.
+        region:
+          type: string
+        state:
+          type: string
+        updated_at:
+          type: string
+      example:
+        image_ref:
+          registry: registry
+          digest: digest
+          tag: tag
+          repository: repository
+          labels:
+            key: labels
+        created_at: created_at
+        nonce: nonce
+        private_ip: private_ip
+        checks:
+        - output: output
+          updated_at: updated_at
+          name: name
+          status: status
+        - output: output
+          updated_at: updated_at
+          name: name
+          status: status
+        instance_id: instance_id
+        updated_at: updated_at
+        name: name
+        id: id
+        state: state
+        region: region
+        config:
+          image: image
+          init:
+            entrypoint:
+            - entrypoint
+            - entrypoint
+            swap_size_mb: 5
+            tty: true
+            cmd:
+            - cmd
+            - cmd
+            kernel_args:
+            - kernel_args
+            - kernel_args
+            exec:
+            - exec
+            - exec
+          metadata:
+            key: metadata
+          processes:
+          - entrypoint:
+            - entrypoint
+            - entrypoint
+            cmd:
+            - cmd
+            - cmd
+            env:
+              key: env
+            user: user
+            exec:
+            - exec
+            - exec
+          - entrypoint:
+            - entrypoint
+            - entrypoint
+            cmd:
+            - cmd
+            - cmd
+            env:
+              key: env
+            user: user
+            exec:
+            - exec
+            - exec
+          restart:
+            max_retries: 7
+            policy: policy
+          auto_destroy: true
+          dns:
+            skip_registration: true
+          mounts:
+          - volume: volume
+            path: path
+            encrypted: true
+            name: name
+            size_gb: 2
+          - volume: volume
+            path: path
+            encrypted: true
+            name: name
+            size_gb: 2
+          services:
+          - min_machines_running: 4
+            protocol: protocol
+            checks:
+            - null
+            - null
+            force_instance_key: force_instance_key
+            autostart: true
+            internal_port: 2
+            ports:
+            - force_https: true
+              port: 1
+              handlers:
+              - handlers
+              - handlers
+              start_port: 1
+              tls_options:
+                alpn:
+                - alpn
+                - alpn
+                default_self_signed: true
+                versions:
+                - versions
+                - versions
+              proxy_proto_options:
+                version: version
+              end_port: 7
+              http_options:
+                compress: true
+                response:
+                  headers:
+                    key: {}
+            - force_https: true
+              port: 1
+              handlers:
+              - handlers
+              - handlers
+              start_port: 1
+              tls_options:
+                alpn:
+                - alpn
+                - alpn
+                default_self_signed: true
+                versions:
+                - versions
+                - versions
+              proxy_proto_options:
+                version: version
+              end_port: 7
+              http_options:
+                compress: true
+                response:
+                  headers:
+                    key: {}
+            force_instance_description: force_instance_description
+            autostop: true
+            concurrency:
+              soft_limit: 3
+              type: type
+              hard_limit: 9
+          - min_machines_running: 4
+            protocol: protocol
+            checks:
+            - null
+            - null
+            force_instance_key: force_instance_key
+            autostart: true
+            internal_port: 2
+            ports:
+            - force_https: true
+              port: 1
+              handlers:
+              - handlers
+              - handlers
+              start_port: 1
+              tls_options:
+                alpn:
+                - alpn
+                - alpn
+                default_self_signed: true
+                versions:
+                - versions
+                - versions
+              proxy_proto_options:
+                version: version
+              end_port: 7
+              http_options:
+                compress: true
+                response:
+                  headers:
+                    key: {}
+            - force_https: true
+              port: 1
+              handlers:
+              - handlers
+              - handlers
+              start_port: 1
+              tls_options:
+                alpn:
+                - alpn
+                - alpn
+                default_self_signed: true
+                versions:
+                - versions
+                - versions
+              proxy_proto_options:
+                version: version
+              end_port: 7
+              http_options:
+                compress: true
+                response:
+                  headers:
+                    key: {}
+            force_instance_description: force_instance_description
+            autostop: true
+            concurrency:
+              soft_limit: 3
+              type: type
+              hard_limit: 9
+          env:
+            key: env
+          statics:
+          - guest_path: guest_path
+            url_prefix: url_prefix
+          - guest_path: guest_path
+            url_prefix: url_prefix
+          schedule: schedule
+          checks:
+            key:
+              headers:
+              - values:
+                - values
+                - values
+                name: name
+              - values:
+                - values
+                - values
+                name: name
+              path: path
+              protocol: protocol
+              method: method
+              port: 0
+              tls_server_name: tls_server_name
+              interval: interval
+              tls_skip_verify: true
+              type: type
+              grace_period: grace_period
+              timeout: timeout
+          size: size
+          host_dedication_id: host_dedication_id
+          files:
+          - secret_name: secret_name
+            raw_value: raw_value
+            guest_path: guest_path
+          - secret_name: secret_name
+            raw_value: raw_value
+            guest_path: guest_path
+          guest:
+            gpu_kind: gpu_kind
+            cpus: 6
+            cpu_kind: cpu_kind
+            memory_mb: 1
+            kernel_args:
+            - kernel_args
+            - kernel_args
+          disable_machine_autostart: true
+          metrics:
+            path: path
+            port: 5
+          standbys:
+          - standbys
+          - standbys
+          stop_config:
+            signal: signal
+            timeout: timeout
+        events:
+        - request: {}
+          id: id
+          source: source
+          type: type
+          status: status
+          timestamp: 1
+        - request: {}
+          id: id
+          source: source
+          type: type
+          status: status
+          timestamp: 1
+    MachineEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        request:
+          type: object
+        source:
+          type: string
+        status:
+          type: string
+        timestamp:
+          type: integer
+        type:
+          type: string
+      example:
+        request: {}
+        id: id
+        source: source
+        type: type
+        status: status
+        timestamp: 1
+    MachineExecRequest:
+      type: object
+      properties:
+        cmd:
+          type: string
+          description: "Deprecated: use Command instead"
+        command:
+          type: array
+          items:
+            type: string
+        timeout:
+          type: integer
+    MachineVersion:
+      type: object
+      properties:
+        user_config:
+          $ref: '#/components/schemas/api.MachineConfig'
+        version:
+          type: string
+      example:
+        version: version
+        user_config:
+          image: image
+          init:
+            entrypoint:
+            - entrypoint
+            - entrypoint
+            swap_size_mb: 5
+            tty: true
+            cmd:
+            - cmd
+            - cmd
+            kernel_args:
+            - kernel_args
+            - kernel_args
+            exec:
+            - exec
+            - exec
+          metadata:
+            key: metadata
+          processes:
+          - entrypoint:
+            - entrypoint
+            - entrypoint
+            cmd:
+            - cmd
+            - cmd
+            env:
+              key: env
+            user: user
+            exec:
+            - exec
+            - exec
+          - entrypoint:
+            - entrypoint
+            - entrypoint
+            cmd:
+            - cmd
+            - cmd
+            env:
+              key: env
+            user: user
+            exec:
+            - exec
+            - exec
+          restart:
+            max_retries: 7
+            policy: policy
+          auto_destroy: true
+          dns:
+            skip_registration: true
+          mounts:
+          - volume: volume
+            path: path
+            encrypted: true
+            name: name
+            size_gb: 2
+          - volume: volume
+            path: path
+            encrypted: true
+            name: name
+            size_gb: 2
+          services:
+          - min_machines_running: 4
+            protocol: protocol
+            checks:
+            - null
+            - null
+            force_instance_key: force_instance_key
+            autostart: true
+            internal_port: 2
+            ports:
+            - force_https: true
+              port: 1
+              handlers:
+              - handlers
+              - handlers
+              start_port: 1
+              tls_options:
+                alpn:
+                - alpn
+                - alpn
+                default_self_signed: true
+                versions:
+                - versions
+                - versions
+              proxy_proto_options:
+                version: version
+              end_port: 7
+              http_options:
+                compress: true
+                response:
+                  headers:
+                    key: {}
+            - force_https: true
+              port: 1
+              handlers:
+              - handlers
+              - handlers
+              start_port: 1
+              tls_options:
+                alpn:
+                - alpn
+                - alpn
+                default_self_signed: true
+                versions:
+                - versions
+                - versions
+              proxy_proto_options:
+                version: version
+              end_port: 7
+              http_options:
+                compress: true
+                response:
+                  headers:
+                    key: {}
+            force_instance_description: force_instance_description
+            autostop: true
+            concurrency:
+              soft_limit: 3
+              type: type
+              hard_limit: 9
+          - min_machines_running: 4
+            protocol: protocol
+            checks:
+            - null
+            - null
+            force_instance_key: force_instance_key
+            autostart: true
+            internal_port: 2
+            ports:
+            - force_https: true
+              port: 1
+              handlers:
+              - handlers
+              - handlers
+              start_port: 1
+              tls_options:
+                alpn:
+                - alpn
+                - alpn
+                default_self_signed: true
+                versions:
+                - versions
+                - versions
+              proxy_proto_options:
+                version: version
+              end_port: 7
+              http_options:
+                compress: true
+                response:
+                  headers:
+                    key: {}
+            - force_https: true
+              port: 1
+              handlers:
+              - handlers
+              - handlers
+              start_port: 1
+              tls_options:
+                alpn:
+                - alpn
+                - alpn
+                default_self_signed: true
+                versions:
+                - versions
+                - versions
+              proxy_proto_options:
+                version: version
+              end_port: 7
+              http_options:
+                compress: true
+                response:
+                  headers:
+                    key: {}
+            force_instance_description: force_instance_description
+            autostop: true
+            concurrency:
+              soft_limit: 3
+              type: type
+              hard_limit: 9
+          env:
+            key: env
+          statics:
+          - guest_path: guest_path
+            url_prefix: url_prefix
+          - guest_path: guest_path
+            url_prefix: url_prefix
+          schedule: schedule
+          checks:
+            key:
+              headers:
+              - values:
+                - values
+                - values
+                name: name
+              - values:
+                - values
+                - values
+                name: name
+              path: path
+              protocol: protocol
+              method: method
+              port: 0
+              tls_server_name: tls_server_name
+              interval: interval
+              tls_skip_verify: true
+              type: type
+              grace_period: grace_period
+              timeout: timeout
+          size: size
+          host_dedication_id: host_dedication_id
+          files:
+          - secret_name: secret_name
+            raw_value: raw_value
+            guest_path: guest_path
+          - secret_name: secret_name
+            raw_value: raw_value
+            guest_path: guest_path
+          guest:
+            gpu_kind: gpu_kind
+            cpus: 6
+            cpu_kind: cpu_kind
+            memory_mb: 1
+            kernel_args:
+            - kernel_args
+            - kernel_args
+          disable_machine_autostart: true
+          metrics:
+            path: path
+            port: 5
+          standbys:
+          - standbys
+          - standbys
+          stop_config:
+            signal: signal
+            timeout: timeout
+    Organization:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+      example:
+        name: name
+        slug: slug
+    ProcessStat:
+      type: object
+      properties:
+        command:
+          type: string
+        cpu:
+          type: integer
+        directory:
+          type: string
+        listen_sockets:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListenSocket'
+        pid:
+          type: integer
+        rss:
+          type: integer
+        rtime:
+          type: integer
+        stime:
+          type: integer
+      example:
+        listen_sockets:
+        - address: address
+          proto: proto
+        - address: address
+          proto: proto
+        rss: 1
+        rtime: 5
+        cpu: 0
+        pid: 6
+        stime: 5
+        directory: directory
+        command: command
+    SignalRequest:
+      type: object
+      properties:
+        signal:
+          type: string
+          enum:
+          - SIGABRT
+          - SIGALRM
+          - SIGFPE
+          - SIGHUP
+          - SIGILL
+          - SIGINT
+          - SIGKILL
+          - SIGPIPE
+          - SIGQUIT
+          - SIGSEGV
+          - SIGTERM
+          - SIGTRAP
+          - SIGUSR1
+    StopRequest:
+      type: object
+      properties:
+        signal:
+          type: string
+        timeout:
+          type: string
+    UpdateMachineRequest:
+      type: object
+      properties:
+        config:
+          $ref: '#/components/schemas/api.MachineConfig'
+        current_version:
+          type: string
+        lease_ttl:
+          type: integer
+        lsvd:
+          type: boolean
+        name:
+          type: string
+        region:
+          type: string
+        skip_launch:
+          type: boolean
+        skip_service_registration:
+          type: boolean
+    Volume:
+      type: object
+      properties:
+        attached_alloc_id:
+          type: string
+        attached_machine_id:
+          type: string
+        block_size:
+          type: integer
+        blocks:
+          type: integer
+        blocks_avail:
+          type: integer
+        blocks_free:
+          type: integer
+        created_at:
+          type: string
+        encrypted:
+          type: boolean
+        fstype:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        region:
+          type: string
+        size_gb:
+          type: integer
+        state:
+          type: string
+        zone:
+          type: string
+      example:
+        blocks: 6
+        attached_machine_id: attached_machine_id
+        created_at: created_at
+        blocks_free: 5
+        encrypted: true
+        zone: zone
+        blocks_avail: 1
+        name: name
+        size_gb: 5
+        attached_alloc_id: attached_alloc_id
+        id: id
+        state: state
+        region: region
+        block_size: 0
+        fstype: fstype
+    VolumeSnapshot:
+      type: object
+      properties:
+        created_at:
+          type: string
+        digest:
+          type: string
+        id:
+          type: string
+        size:
+          type: integer
+      example:
+        size: 0
+        digest: digest
+        created_at: created_at
+        id: id
+    api.DNSConfig:
+      type: object
+      properties:
+        skip_registration:
+          type: boolean
+      example:
+        skip_registration: true
+    api.File:
+      type: object
+      properties:
+        guest_path:
+          type: string
+          description: |-
+            GuestPath is the path on the machine where the file will be written and must be an absolute path.
+            i.e. /full/path/to/file.json
+        raw_value:
+          type: string
+          description: RawValue containts the base64 encoded string of the file contents.
+        secret_name:
+          type: string
+          description: SecretName is the name of the secret that contains the base64
+            encoded file contents.
+      example:
+        secret_name: secret_name
+        raw_value: raw_value
+        guest_path: guest_path
+    api.HTTPOptions:
+      type: object
+      properties:
+        compress:
+          type: boolean
+        response:
+          $ref: '#/components/schemas/api.HTTPResponseOptions'
+      example:
+        compress: true
+        response:
+          headers:
+            key: {}
+    api.HTTPResponseOptions:
+      type: object
+      properties:
+        headers:
+          type: object
+          additionalProperties:
+            type: object
+      example:
+        headers:
+          key: {}
+    api.MachineCheck:
+      type: object
+      properties:
+        grace_period:
+          type: string
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.MachineHTTPHeader'
+        interval:
+          type: string
+        method:
+          type: string
+        path:
+          type: string
+        port:
+          type: integer
+        protocol:
+          type: string
+        timeout:
+          type: string
+        tls_server_name:
+          type: string
+        tls_skip_verify:
+          type: boolean
+        type:
+          type: string
+      example:
+        headers:
+        - values:
+          - values
+          - values
+          name: name
+        - values:
+          - values
+          - values
+          name: name
+        path: path
+        protocol: protocol
+        method: method
+        port: 0
+        tls_server_name: tls_server_name
+        interval: interval
+        tls_skip_verify: true
+        type: type
+        grace_period: grace_period
+        timeout: timeout
+    api.MachineConfig:
+      type: object
+      properties:
+        auto_destroy:
+          type: boolean
+        checks:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/api.MachineCheck'
+        disable_machine_autostart:
+          type: boolean
+          description: "Deprecated: use Service.Autostart instead"
+        dns:
+          $ref: '#/components/schemas/api.DNSConfig'
+        env:
+          type: object
+          additionalProperties:
+            type: string
+          description: |-
+            Fields managed from fly.toml
+            If you add anything here, ensure appconfig.Config.ToMachine() is updated
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.File'
+        guest:
+          $ref: '#/components/schemas/api.MachineGuest'
+        host_dedication_id:
+          type: string
+        image:
+          type: string
+          description: Set by fly deploy or fly machines commands
+        init:
+          $ref: '#/components/schemas/api.MachineInit'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+        metrics:
+          $ref: '#/components/schemas/api.MachineMetrics'
+        mounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.MachineMount'
+        processes:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.MachineProcess'
+        restart:
+          $ref: '#/components/schemas/api.MachineRestart'
+        schedule:
+          type: string
+          description: |-
+            The following fields can only be set or updated by `fly machines run|update` commands
+            "fly deploy" must preserve them, if you add anything here, ensure it is propagated on deploys
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.MachineService'
+        size:
+          type: string
+          description: "Deprecated: use Guest instead"
+        standbys:
+          type: array
+          description: |-
+            Standbys enable a machine to be a standby for another. In the event of a hardware failure,
+            the standby machine will be started.
+          items:
+            type: string
+        statics:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.Static'
+        stop_config:
+          $ref: '#/components/schemas/api.StopConfig'
+      example:
+        image: image
+        init:
+          entrypoint:
+          - entrypoint
+          - entrypoint
+          swap_size_mb: 5
+          tty: true
+          cmd:
+          - cmd
+          - cmd
+          kernel_args:
+          - kernel_args
+          - kernel_args
+          exec:
+          - exec
+          - exec
+        metadata:
+          key: metadata
+        processes:
+        - entrypoint:
+          - entrypoint
+          - entrypoint
+          cmd:
+          - cmd
+          - cmd
+          env:
+            key: env
+          user: user
+          exec:
+          - exec
+          - exec
+        - entrypoint:
+          - entrypoint
+          - entrypoint
+          cmd:
+          - cmd
+          - cmd
+          env:
+            key: env
+          user: user
+          exec:
+          - exec
+          - exec
+        restart:
+          max_retries: 7
+          policy: policy
+        auto_destroy: true
+        dns:
+          skip_registration: true
+        mounts:
+        - volume: volume
+          path: path
+          encrypted: true
+          name: name
+          size_gb: 2
+        - volume: volume
+          path: path
+          encrypted: true
+          name: name
+          size_gb: 2
+        services:
+        - min_machines_running: 4
+          protocol: protocol
+          checks:
+          - null
+          - null
+          force_instance_key: force_instance_key
+          autostart: true
+          internal_port: 2
+          ports:
+          - force_https: true
+            port: 1
+            handlers:
+            - handlers
+            - handlers
+            start_port: 1
+            tls_options:
+              alpn:
+              - alpn
+              - alpn
+              default_self_signed: true
+              versions:
+              - versions
+              - versions
+            proxy_proto_options:
+              version: version
+            end_port: 7
+            http_options:
+              compress: true
+              response:
+                headers:
+                  key: {}
+          - force_https: true
+            port: 1
+            handlers:
+            - handlers
+            - handlers
+            start_port: 1
+            tls_options:
+              alpn:
+              - alpn
+              - alpn
+              default_self_signed: true
+              versions:
+              - versions
+              - versions
+            proxy_proto_options:
+              version: version
+            end_port: 7
+            http_options:
+              compress: true
+              response:
+                headers:
+                  key: {}
+          force_instance_description: force_instance_description
+          autostop: true
+          concurrency:
+            soft_limit: 3
+            type: type
+            hard_limit: 9
+        - min_machines_running: 4
+          protocol: protocol
+          checks:
+          - null
+          - null
+          force_instance_key: force_instance_key
+          autostart: true
+          internal_port: 2
+          ports:
+          - force_https: true
+            port: 1
+            handlers:
+            - handlers
+            - handlers
+            start_port: 1
+            tls_options:
+              alpn:
+              - alpn
+              - alpn
+              default_self_signed: true
+              versions:
+              - versions
+              - versions
+            proxy_proto_options:
+              version: version
+            end_port: 7
+            http_options:
+              compress: true
+              response:
+                headers:
+                  key: {}
+          - force_https: true
+            port: 1
+            handlers:
+            - handlers
+            - handlers
+            start_port: 1
+            tls_options:
+              alpn:
+              - alpn
+              - alpn
+              default_self_signed: true
+              versions:
+              - versions
+              - versions
+            proxy_proto_options:
+              version: version
+            end_port: 7
+            http_options:
+              compress: true
+              response:
+                headers:
+                  key: {}
+          force_instance_description: force_instance_description
+          autostop: true
+          concurrency:
+            soft_limit: 3
+            type: type
+            hard_limit: 9
+        env:
+          key: env
+        statics:
+        - guest_path: guest_path
+          url_prefix: url_prefix
+        - guest_path: guest_path
+          url_prefix: url_prefix
+        schedule: schedule
+        checks:
+          key:
+            headers:
+            - values:
+              - values
+              - values
+              name: name
+            - values:
+              - values
+              - values
+              name: name
+            path: path
+            protocol: protocol
+            method: method
+            port: 0
+            tls_server_name: tls_server_name
+            interval: interval
+            tls_skip_verify: true
+            type: type
+            grace_period: grace_period
+            timeout: timeout
+        size: size
+        host_dedication_id: host_dedication_id
+        files:
+        - secret_name: secret_name
+          raw_value: raw_value
+          guest_path: guest_path
+        - secret_name: secret_name
+          raw_value: raw_value
+          guest_path: guest_path
+        guest:
+          gpu_kind: gpu_kind
+          cpus: 6
+          cpu_kind: cpu_kind
+          memory_mb: 1
+          kernel_args:
+          - kernel_args
+          - kernel_args
+        disable_machine_autostart: true
+        metrics:
+          path: path
+          port: 5
+        standbys:
+        - standbys
+        - standbys
+        stop_config:
+          signal: signal
+          timeout: timeout
+    api.MachineGuest:
+      type: object
+      properties:
+        cpu_kind:
+          type: string
+        cpus:
+          type: integer
+        gpu_kind:
+          type: string
+        kernel_args:
+          type: array
+          items:
+            type: string
+        memory_mb:
+          type: integer
+      example:
+        gpu_kind: gpu_kind
+        cpus: 6
+        cpu_kind: cpu_kind
+        memory_mb: 1
+        kernel_args:
+        - kernel_args
+        - kernel_args
+    api.MachineHTTPHeader:
+      type: object
+      properties:
+        name:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+      example:
+        values:
+        - values
+        - values
+        name: name
+    api.MachineInit:
+      type: object
+      properties:
+        cmd:
+          type: array
+          items:
+            type: string
+        entrypoint:
+          type: array
+          items:
+            type: string
+        exec:
+          type: array
+          items:
+            type: string
+        kernel_args:
+          type: array
+          items:
+            type: string
+        swap_size_mb:
+          type: integer
+        tty:
+          type: boolean
+      example:
+        entrypoint:
+        - entrypoint
+        - entrypoint
+        swap_size_mb: 5
+        tty: true
+        cmd:
+        - cmd
+        - cmd
+        kernel_args:
+        - kernel_args
+        - kernel_args
+        exec:
+        - exec
+        - exec
+    api.MachineMetrics:
+      type: object
+      properties:
+        path:
+          type: string
+        port:
+          type: integer
+      example:
+        path: path
+        port: 5
+    api.MachineMount:
+      type: object
+      properties:
+        encrypted:
+          type: boolean
+        name:
+          type: string
+        path:
+          type: string
+        size_gb:
+          type: integer
+        volume:
+          type: string
+      example:
+        volume: volume
+        path: path
+        encrypted: true
+        name: name
+        size_gb: 2
+    api.MachinePort:
+      type: object
+      properties:
+        end_port:
+          type: integer
+        force_https:
+          type: boolean
+        handlers:
+          type: array
+          items:
+            type: string
+        http_options:
+          $ref: '#/components/schemas/api.HTTPOptions'
+        port:
+          type: integer
+        proxy_proto_options:
+          $ref: '#/components/schemas/api.ProxyProtoOptions'
+        start_port:
+          type: integer
+        tls_options:
+          $ref: '#/components/schemas/api.TLSOptions'
+      example:
+        force_https: true
+        port: 1
+        handlers:
+        - handlers
+        - handlers
+        start_port: 1
+        tls_options:
+          alpn:
+          - alpn
+          - alpn
+          default_self_signed: true
+          versions:
+          - versions
+          - versions
+        proxy_proto_options:
+          version: version
+        end_port: 7
+        http_options:
+          compress: true
+          response:
+            headers:
+              key: {}
+    api.MachineProcess:
+      type: object
+      properties:
+        cmd:
+          type: array
+          items:
+            type: string
+        entrypoint:
+          type: array
+          items:
+            type: string
+        env:
+          type: object
+          additionalProperties:
+            type: string
+        exec:
+          type: array
+          items:
+            type: string
+        user:
+          type: string
+      example:
+        entrypoint:
+        - entrypoint
+        - entrypoint
+        cmd:
+        - cmd
+        - cmd
+        env:
+          key: env
+        user: user
+        exec:
+        - exec
+        - exec
+    api.MachineRestart:
+      type: object
+      properties:
+        max_retries:
+          type: integer
+          description: MaxRetries is only relevant with the on-failure policy.
+        policy:
+          type: string
+      example:
+        max_retries: 7
+        policy: policy
+    api.MachineService:
+      type: object
+      properties:
+        autostart:
+          type: boolean
+        autostop:
+          type: boolean
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.MachineCheck'
+        concurrency:
+          $ref: '#/components/schemas/api.MachineServiceConcurrency'
+        force_instance_description:
+          type: string
+        force_instance_key:
+          type: string
+        internal_port:
+          type: integer
+        min_machines_running:
+          type: integer
+        ports:
+          type: array
+          items:
+            $ref: '#/components/schemas/api.MachinePort'
+        protocol:
+          type: string
+      example:
+        min_machines_running: 4
+        protocol: protocol
+        checks:
+        - null
+        - null
+        force_instance_key: force_instance_key
+        autostart: true
+        internal_port: 2
+        ports:
+        - force_https: true
+          port: 1
+          handlers:
+          - handlers
+          - handlers
+          start_port: 1
+          tls_options:
+            alpn:
+            - alpn
+            - alpn
+            default_self_signed: true
+            versions:
+            - versions
+            - versions
+          proxy_proto_options:
+            version: version
+          end_port: 7
+          http_options:
+            compress: true
+            response:
+              headers:
+                key: {}
+        - force_https: true
+          port: 1
+          handlers:
+          - handlers
+          - handlers
+          start_port: 1
+          tls_options:
+            alpn:
+            - alpn
+            - alpn
+            default_self_signed: true
+            versions:
+            - versions
+            - versions
+          proxy_proto_options:
+            version: version
+          end_port: 7
+          http_options:
+            compress: true
+            response:
+              headers:
+                key: {}
+        force_instance_description: force_instance_description
+        autostop: true
+        concurrency:
+          soft_limit: 3
+          type: type
+          hard_limit: 9
+    api.MachineServiceConcurrency:
+      type: object
+      properties:
+        hard_limit:
+          type: integer
+        soft_limit:
+          type: integer
+        type:
+          type: string
+      example:
+        soft_limit: 3
+        type: type
+        hard_limit: 9
+    api.ProxyProtoOptions:
+      type: object
+      properties:
+        version:
+          type: string
+      example:
+        version: version
+    api.Static:
+      required:
+      - guest_path
+      - url_prefix
+      type: object
+      properties:
+        guest_path:
+          type: string
+        url_prefix:
+          type: string
+      example:
+        guest_path: guest_path
+        url_prefix: url_prefix
+    api.StopConfig:
+      type: object
+      properties:
+        signal:
+          type: string
+        timeout:
+          type: string
+      example:
+        signal: signal
+        timeout: timeout
+    api.TLSOptions:
+      type: object
+      properties:
+        alpn:
+          type: array
+          items:
+            type: string
+        default_self_signed:
+          type: boolean
+        versions:
+          type: array
+          items:
+            type: string
+      example:
+        alpn:
+        - alpn
+        - alpn
+        default_self_signed: true
+        versions:
+        - versions
+        - versions
+    main.statusCode:
+      type: string
+      enum:
+      - unknown
+      - insufficient_capacity
+      x-enum-varnames:
+      - unknown
+      - capacityErr

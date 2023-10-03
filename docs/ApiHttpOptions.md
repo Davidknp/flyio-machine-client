@@ -1,0 +1,10 @@
+# ApiHttpOptions
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**Compress** | **bool** |  | [optional] [default to null]
+**Response** | [***ApiHttpResponseOptions**](api.HTTPResponseOptions.md) |  | [optional] [default to null]
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
